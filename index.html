@@ -1,36 +1,181 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Location Sticker</title>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color-scheme:light dark}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#f2f2f7;color:#111;padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom)}
-main{max-width:620px;margin:auto;padding:34px 0}.card{background:#fff;border-radius:28px;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
-h1{font-size:25px;margin:0 0 6px}.sub{color:#6e6e73;margin:0 0 24px;line-height:1.4}.label{font-size:13px;font-weight:700;margin:18px 0 8px;display:block}
-input{width:100%;border:1px solid #ddd;border-radius:16px;padding:15px 16px;font-size:17px;background:#fafafa;color:#111;outline:none}
-.preview{height:230px;border-radius:22px;margin-top:20px;display:grid;place-items:center;background:linear-gradient(145deg,#202026,#44444d);overflow:hidden;padding:18px}
-#sticker{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:10px 15px;border-radius:8px;background:#fff;color:#111;font-weight:700;font-size:16px;line-height:1.05;letter-spacing:.15px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.12);transform:rotate(-.4deg)}
-#sticker.pin::before{content:'⌖';font-size:15px;margin-right:6px;font-weight:800}.styles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.styleBtn{border:1px solid #ddd;background:#fafafa;color:#111;border-radius:14px;padding:11px 8px;font-weight:650}.styleBtn.active{background:#111;color:#fff;border-color:#111}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}button.action{border:0;border-radius:16px;padding:15px 12px;font-size:16px;font-weight:750;cursor:pointer}.primary{background:#111;color:#fff}.secondary{background:#e9e9ee;color:#111}.tip{font-size:12px;color:#777;margin:14px 3px 0;line-height:1.4;text-align:center}
-@media(prefers-color-scheme:dark){body{background:#000;color:#f5f5f7}.card{background:#1c1c1e}.sub,.tip{color:#aaa}input,.styleBtn{background:#2c2c2e;color:#fff;border-color:#3a3a3c}.styleBtn.active{background:#fff;color:#000;border-color:#fff}.secondary{background:#2c2c2e;color:#fff}.primary{background:#fff;color:#000}}
+*{box-sizing:border-box}
+body{margin:0;background:#101014;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:680px;margin:auto;padding:30px 18px}
+h1{font-size:27px;margin:0 0 7px}
+p{color:#aaa;margin:0 0 24px;line-height:1.5}
+.panel{background:#1b1b21;border:1px solid #303039;border-radius:22px;padding:18px}
+label{display:block;color:#aaa;font-size:13px;margin-bottom:9px}
+input{width:100%;padding:15px;background:#101014;border:1px solid #444;color:white;border-radius:12px;font-size:17px}
+.styles{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:16px 0}
+.style{background:#303039;color:white;border:0;border-radius:10px;padding:12px 3px;font-size:12px}
+.style.active{outline:2px solid white}
+.preview{min-height:230px;border-radius:17px;background:linear-gradient(140deg,#40404a,#25252c);display:flex;justify-content:center;align-items:center;overflow:hidden;padding:15px}
+canvas{max-width:100%;height:auto}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+.action{border:0;border-radius:12px;padding:15px;font-weight:700}
+#save{background:white;color:black}
+#copy{background:#383840;color:white}
+small{display:block;margin-top:15px;color:#999;line-height:1.5}
 </style>
 </head>
-<body><main><section class="card">
-<h1>Location Sticker</h1><p class="sub">Crie uma etiqueta de localização para usar nos seus Stories. Digite qualquer lugar, mesmo que ele ainda não esteja cadastrado.</p>
-<label class="label" for="text">NOME DO LOCAL</label><input id="text" maxlength="45" value="CHÁCARA DA AMÉLIA" autocomplete="off" />
-<label class="label">ESTILO</label><div class="styles"><button class="styleBtn active" data-style="white">Branco</button><button class="styleBtn" data-style="black">Preto</button><button class="styleBtn" data-style="clear">Transparente</button></div>
-<div class="preview"><div id="sticker" class="pin">CHÁCARA DA AMÉLIA</div></div>
-<div class="actions"><button class="action secondary" id="copy">Copiar</button><button class="action primary" id="download">Salvar PNG</button></div>
-<p class="tip">O PNG é exportado com fundo transparente. No iPhone, você pode salvar a imagem e adicioná-la sobre o Story como figurinha/foto.</p>
-</section></main>
-<canvas id="canvas" hidden></canvas>
+<body>
+<main>
+<h1>Location Sticker</h1>
+<p>Crie etiquetas de localização no estilo clássico dos Stories.</p>
+<div class="panel">
+<label for="place">NOME DA LOCALIZAÇÃO</label>
+<input id="place" value="CHÁCARA DA AMÉLIA" maxlength="45">
+<div class="styles">
+<button class="style active" data-style="gray">Cinza</button>
+<button class="style" data-style="purple">Roxo</button>
+<button class="style" data-style="rainbow">Colorido</button>
+<button class="style" data-style="black">Preto</button>
+</div>
+<div class="preview">
+<canvas id="sticker"></canvas>
+</div>
+<div class="actions">
+<button class="action" id="copy">Copiar PNG</button>
+<button class="action" id="save">Salvar PNG</button>
+</div>
+<small>PNG transparente, com largura ajustada ao texto. A etiqueta é visual e não cria um link de localização no Instagram.</small>
+</div>
+</main>
 <script>
-const input=document.querySelector('#text'), sticker=document.querySelector('#sticker'), canvas=document.querySelector('#canvas'); let style='white';
-function render(){sticker.textContent='';sticker.className='pin';sticker.append(document.createTextNode(input.value.trim()||'LOCALIZAÇÃO')); if(style==='white'){sticker.style.background='#fff';sticker.style.color='#111';sticker.style.border='0'} if(style==='black'){sticker.style.background='#111';sticker.style.color='#fff';sticker.style.border='0'} if(style==='clear'){sticker.style.background='rgba(255,255,255,.12)';sticker.style.color='#fff';sticker.style.border='1px solid rgba(255,255,255,.55)'}}
-input.oninput=render; document.querySelectorAll('.styleBtn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.styleBtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');style=b.dataset.style;render()});
-function makeBlob(cb){const text=(input.value.trim()||'LOCALIZAÇÃO').toUpperCase(); const scale=4, font='700 16px -apple-system, BlinkMacSystemFont, Segoe UI, Arial'; const m=document.createElement('canvas').getContext('2d');m.font=font; const tw=m.measureText(text).width; const padX=15,padY=10, icon=20; const w=Math.ceil(tw+padX*2+icon),h=37; canvas.width=w*scale;canvas.height=h*scale;const c=canvas.getContext('2d');c.scale(scale,scale); c.font=font;c.textBaseline='middle'; const r=8;c.beginPath();c.roundRect(0,0,w,h,r); if(style==='white')c.fillStyle='#fff'; else if(style==='black')c.fillStyle='#111'; else c.fillStyle='rgba(255,255,255,.18)';c.fill(); if(style==='clear'){c.strokeStyle='rgba(255,255,255,.75)';c.lineWidth=1;c.stroke()} c.fillStyle=style==='white'?'#111':'#fff';c.font='800 15px Arial';c.fillText('⌖',padX,h/2+1);c.font=font;c.fillText(text,padX+icon,h/2+1);canvas.toBlob(cb,'image/png')}
-document.querySelector('#download').onclick=()=>makeBlob(blob=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='location-sticker.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
-document.querySelector('#copy').onclick=()=>makeBlob(async blob=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);const b=document.querySelector('#copy');b.textContent='Copiado ✓';setTimeout(()=>b.textContent='Copiar',1400)}catch(e){alert('O Safari pode bloquear a cópia direta. Use “Salvar PNG”.')}});render();
-</script></body></html>
+const canvas=document.getElementById("sticker");
+const ctx=canvas.getContext("2d");
+const place=document.getElementById("place");
+let style="gray";
+const scale=3;
+
+function roundRect(x,y,w,h,r){
+ctx.beginPath();
+ctx.moveTo(x+r,y);
+ctx.arcTo(x+w,y,x+w,y+h,r);
+ctx.arcTo(x+w,y+h,x,y+h,r);
+ctx.arcTo(x,y+h,x,y,r);
+ctx.arcTo(x,y,x+r,y);
+ctx.closePath();
+}
+
+function gradient(x,y,w){
+const g=ctx.createLinearGradient(x,y,x+w,y);
+g.addColorStop(0,"#ff1717");
+g.addColorStop(.22,"#ff9200");
+g.addColorStop(.42,"#e9cf00");
+g.addColorStop(.62,"#009e64");
+g.addColorStop(.8,"#00a1d7");
+g.addColorStop(1,"#164a9f");
+return g;
+}
+
+function instagramGradient(x,y,w,h){
+const g=ctx.createLinearGradient(x,y+h,x+w,y);
+g.addColorStop(0,"#ff9c27");
+g.addColorStop(.3,"#ec4369");
+g.addColorStop(.68,"#a92ca1");
+g.addColorStop(1,"#6c38ad");
+return g;
+}
+
+function pin(x,y,size){
+ctx.beginPath();
+ctx.moveTo(x,y+size*.72);
+ctx.bezierCurveTo(x-size*.14,y+size*.48,x-size*.49,y+size*.07,x-size*.49,y-size*.25);
+ctx.bezierCurveTo(x-size*.49,y-size*.67,x-size*.26,y-size*.91,x,y-size*.91);
+ctx.bezierCurveTo(x+size*.26,y-size*.91,x+size*.49,y-size*.67,x+size*.49,y-size*.25);
+ctx.bezierCurveTo(x+size*.49,y+size*.07,x+size*.14,y+size*.48,x,y+size*.72);
+ctx.closePath();
+}
+
+function render(){
+const text=(place.value.trim()||"LOCALIZAÇÃO").toUpperCase();
+const fontSize=49;
+const compression=.69;
+ctx.font='500 '+fontSize+'px "Arial Narrow",Arial,sans-serif';
+const textWidth=ctx.measureText(text).width*compression;
+const H=110;
+const W=Math.ceil(25+60+21+textWidth+27);
+canvas.width=W*scale;
+canvas.height=H*scale;
+canvas.style.width=W+"px";
+canvas.style.height=H+"px";
+ctx.setTransform(scale,0,0,scale,0,0);
+ctx.clearRect(0,0,W,H);
+
+roundRect(1,1,W-2,H-2,23);
+ctx.fillStyle=style==="gray"?"#68686b":"#ffffff";
+ctx.fill();
+
+const px=51,py=57;
+pin(px,py,32);
+ctx.fillStyle=style==="gray"?"#fff":
+style==="purple"?"#70248c":
+style==="rainbow"?"#ed1010":
+instagramGradient(30,23,45,66);
+ctx.fill();
+
+ctx.beginPath();
+ctx.arc(px,py-9,8.5,0,Math.PI*2);
+ctx.fillStyle=style==="gray"?"#68686b":"#fff";
+ctx.fill();
+
+ctx.fillStyle=style==="gray"?"#fff":"#252525";
+ctx.fillRect(86,21,3,68);
+
+ctx.save();
+ctx.translate(106,H/2);
+ctx.scale(compression,1);
+ctx.font='500 '+fontSize+'px "Arial Narrow",Arial,sans-serif';
+ctx.textBaseline="middle";
+ctx.fillStyle=style==="gray"?"#fff":
+style==="purple"?"#30218e":
+style==="rainbow"?gradient(0,0,textWidth/compression):
+"#111";
+ctx.fillText(text,0,2);
+ctx.restore();
+}
+
+place.addEventListener("input",render);
+document.querySelectorAll(".style").forEach(button=>{
+button.addEventListener("click",()=>{
+document.querySelectorAll(".style").forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+style=button.dataset.style;
+render();
+});
+});
+
+document.getElementById("save").addEventListener("click",()=>{
+canvas.toBlob(blob=>{
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;
+a.download="location-sticker.png";
+a.click();
+setTimeout(()=>URL.revokeObjectURL(url),3000);
+},"image/png");
+});
+
+document.getElementById("copy").addEventListener("click",async()=>{
+try{
+const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+alert("Sticker copiado!");
+}catch(e){
+alert("Não foi possível copiar. Use Salvar PNG.");
+}
+});
+
+render();
+</script>
+</body>
+</html>
