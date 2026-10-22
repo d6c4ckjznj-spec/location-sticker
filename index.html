@@ -3,176 +3,309 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101014">
 <title>Location Sticker</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101014;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{max-width:680px;margin:auto;padding:30px 18px}
+body{
+ margin:0;background:#101014;color:#fff;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+main{max-width:680px;margin:auto;padding:30px 18px 55px}
 h1{font-size:27px;margin:0 0 7px}
 p{color:#aaa;margin:0 0 24px;line-height:1.5}
-.panel{background:#1b1b21;border:1px solid #303039;border-radius:22px;padding:18px}
+.panel{
+ background:#1b1b21;border:1px solid #303039;
+ border-radius:22px;padding:18px
+}
 label{display:block;color:#aaa;font-size:13px;margin-bottom:9px}
-input{width:100%;padding:15px;background:#101014;border:1px solid #444;color:white;border-radius:12px;font-size:17px}
-.styles{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:16px 0}
-.style{background:#303039;color:white;border:0;border-radius:10px;padding:12px 3px;font-size:12px}
+input{
+ width:100%;padding:15px;background:#101014;
+ border:1px solid #444;color:#fff;border-radius:12px;
+ font-size:17px;outline:none
+}
+.styles{
+ display:grid;grid-template-columns:repeat(4,1fr);
+ gap:7px;margin:16px 0
+}
+button{font-family:inherit;cursor:pointer}
+.style{
+ background:#303039;color:#fff;border:0;
+ border-radius:10px;padding:12px 3px;font-size:12px
+}
 .style.active{outline:2px solid white}
-.preview{min-height:230px;border-radius:17px;background:linear-gradient(140deg,#40404a,#25252c);display:flex;justify-content:center;align-items:center;overflow:hidden;padding:15px}
-canvas{max-width:100%;height:auto}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
-.action{border:0;border-radius:12px;padding:15px;font-weight:700}
-#save{background:white;color:black}
-#copy{background:#383840;color:white}
+.preview{
+ min-height:230px;border-radius:17px;
+ background:linear-gradient(140deg,#40404a,#25252c);
+ display:flex;justify-content:center;align-items:center;
+ overflow:hidden;padding:15px
+}
+canvas{display:block;max-width:100%;height:auto}
+.actions{
+ display:grid;grid-template-columns:1fr 1fr;
+ gap:10px;margin-top:15px
+}
+.action{
+ border:0;border-radius:12px;padding:15px;
+ font-size:14px;font-weight:700
+}
+#save{background:#fff;color:#000}
+#copy{background:#383840;color:#fff}
+#view{width:100%;margin-top:10px;background:#303039;color:#fff}
 small{display:block;margin-top:15px;color:#999;line-height:1.5}
+#status{margin-top:12px;font-size:13px;color:#c8c8d0}
 </style>
 </head>
 <body>
 <main>
 <h1>Location Sticker</h1>
-<p>Crie etiquetas de localização no estilo clássico dos Stories.</p>
+<p>Crie sua etiqueta de localização personalizada para os Stories.</p>
 <div class="panel">
 <label for="place">NOME DA LOCALIZAÇÃO</label>
 <input id="place" value="CHÁCARA DA AMÉLIA" maxlength="45">
+
 <div class="styles">
 <button class="style active" data-style="gray">Cinza</button>
 <button class="style" data-style="purple">Roxo</button>
 <button class="style" data-style="rainbow">Colorido</button>
 <button class="style" data-style="black">Preto</button>
 </div>
+
 <div class="preview">
 <canvas id="sticker"></canvas>
 </div>
+
 <div class="actions">
 <button class="action" id="copy">Copiar PNG</button>
 <button class="action" id="save">Salvar PNG</button>
 </div>
-<small>PNG transparente, com largura ajustada ao texto. A etiqueta é visual e não cria um link de localização no Instagram.</small>
+<button class="action" id="view">Abrir imagem para salvar no iPhone</button>
+<div id="status" role="status"></div>
+<small>
+O PNG possui fundo transparente. A etiqueta é visual e não cria uma localização clicável no Instagram.
+</small>
 </div>
 </main>
+
 <script>
+"use strict";
+
 const canvas=document.getElementById("sticker");
 const ctx=canvas.getContext("2d");
 const place=document.getElementById("place");
-let style="gray";
-const scale=3;
+const statusEl=document.getElementById("status");
 
-function roundRect(x,y,w,h,r){
-ctx.beginPath();
-ctx.moveTo(x+r,y);
-ctx.arcTo(x+w,y,x+w,y+h,r);
-ctx.arcTo(x+w,y+h,x,y+h,r);
-ctx.arcTo(x,y+h,x,y,r);
-ctx.arcTo(x,y,x+r,y);
-ctx.closePath();
+let currentStyle="gray";
+const SCALE=3;
+
+function message(text){
+ statusEl.textContent=text;
 }
 
-function gradient(x,y,w){
-const g=ctx.createLinearGradient(x,y,x+w,y);
-g.addColorStop(0,"#ff1717");
-g.addColorStop(.22,"#ff9200");
-g.addColorStop(.42,"#e9cf00");
-g.addColorStop(.62,"#009e64");
-g.addColorStop(.8,"#00a1d7");
-g.addColorStop(1,"#164a9f");
-return g;
+function roundedRectangle(x,y,w,h,r){
+ ctx.beginPath();
+ ctx.moveTo(x+r,y);
+ ctx.arcTo(x+w,y,x+w,y+h,r);
+ ctx.arcTo(x+w,y+h,x,y+h,r);
+ ctx.arcTo(x,y+h,x,y,r);
+ ctx.arcTo(x,y,x+w,y,r);
+ ctx.closePath();
+}
+
+function rainbowGradient(width){
+ const g=ctx.createLinearGradient(0,0,width,0);
+ g.addColorStop(0,"#f11717");
+ g.addColorStop(.2,"#ff8500");
+ g.addColorStop(.4,"#e9c900");
+ g.addColorStop(.6,"#00a364");
+ g.addColorStop(.8,"#00a3d8");
+ g.addColorStop(1,"#16469b");
+ return g;
 }
 
 function instagramGradient(x,y,w,h){
-const g=ctx.createLinearGradient(x,y+h,x+w,y);
-g.addColorStop(0,"#ff9c27");
-g.addColorStop(.3,"#ec4369");
-g.addColorStop(.68,"#a92ca1");
-g.addColorStop(1,"#6c38ad");
-return g;
+ const g=ctx.createLinearGradient(x,y+h,x+w,y);
+ g.addColorStop(0,"#ff9c27");
+ g.addColorStop(.3,"#ec4369");
+ g.addColorStop(.68,"#a92ca1");
+ g.addColorStop(1,"#6c38ad");
+ return g;
 }
 
-function pin(x,y,size){
-ctx.beginPath();
-ctx.moveTo(x,y+size*.72);
-ctx.bezierCurveTo(x-size*.14,y+size*.48,x-size*.49,y+size*.07,x-size*.49,y-size*.25);
-ctx.bezierCurveTo(x-size*.49,y-size*.67,x-size*.26,y-size*.91,x,y-size*.91);
-ctx.bezierCurveTo(x+size*.26,y-size*.91,x+size*.49,y-size*.67,x+size*.49,y-size*.25);
-ctx.bezierCurveTo(x+size*.49,y+size*.07,x+size*.14,y+size*.48,x,y+size*.72);
-ctx.closePath();
+function drawPin(x,y,size){
+ ctx.beginPath();
+ ctx.moveTo(x,y+size*.72);
+ ctx.bezierCurveTo(
+  x-size*.14,y+size*.48,
+  x-size*.49,y+size*.07,
+  x-size*.49,y-size*.25
+ );
+ ctx.bezierCurveTo(
+  x-size*.49,y-size*.67,
+  x-size*.26,y-size*.91,
+  x,y-size*.91
+ );
+ ctx.bezierCurveTo(
+  x+size*.26,y-size*.91,
+  x+size*.49,y-size*.67,
+  x+size*.49,y-size*.25
+ );
+ ctx.bezierCurveTo(
+  x+size*.49,y+size*.07,
+  x+size*.14,y+size*.48,
+  x,y+size*.72
+ );
+ ctx.closePath();
 }
 
 function render(){
-const text=(place.value.trim()||"LOCALIZAÇÃO").toUpperCase();
-const fontSize=49;
-const compression=.69;
-ctx.font='500 '+fontSize+'px "Arial Narrow",Arial,sans-serif';
-const textWidth=ctx.measureText(text).width*compression;
-const H=110;
-const W=Math.ceil(25+60+21+textWidth+27);
-canvas.width=W*scale;
-canvas.height=H*scale;
-canvas.style.width=W+"px";
-canvas.style.height=H+"px";
-ctx.setTransform(scale,0,0,scale,0,0);
-ctx.clearRect(0,0,W,H);
+ if(!ctx){
+  message("Seu navegador não oferece suporte ao Canvas.");
+  return;
+ }
 
-roundRect(1,1,W-2,H-2,23);
-ctx.fillStyle=style==="gray"?"#68686b":"#ffffff";
-ctx.fill();
+ const text=(place.value.trim()||"LOCALIZAÇÃO").toUpperCase();
+ const fontSize=49;
+ const compression=.69;
+ const font='500 '+fontSize+'px "Arial Narrow",Arial,sans-serif';
 
-const px=51,py=57;
-pin(px,py,32);
-ctx.fillStyle=style==="gray"?"#fff":
-style==="purple"?"#70248c":
-style==="rainbow"?"#ed1010":
-instagramGradient(30,23,45,66);
-ctx.fill();
+ ctx.font=font;
+ const rawWidth=ctx.measureText(text).width;
+ const textWidth=rawWidth*compression;
 
-ctx.beginPath();
-ctx.arc(px,py-9,8.5,0,Math.PI*2);
-ctx.fillStyle=style==="gray"?"#68686b":"#fff";
-ctx.fill();
+ const H=110;
+ const W=Math.ceil(106+textWidth+27);
 
-ctx.fillStyle=style==="gray"?"#fff":"#252525";
-ctx.fillRect(86,21,3,68);
+ canvas.width=W*SCALE;
+ canvas.height=H*SCALE;
 
-ctx.save();
-ctx.translate(106,H/2);
-ctx.scale(compression,1);
-ctx.font='500 '+fontSize+'px "Arial Narrow",Arial,sans-serif';
-ctx.textBaseline="middle";
-ctx.fillStyle=style==="gray"?"#fff":
-style==="purple"?"#30218e":
-style==="rainbow"?gradient(0,0,textWidth/compression):
-"#111";
-ctx.fillText(text,0,2);
-ctx.restore();
+ ctx.setTransform(SCALE,0,0,SCALE,0,0);
+ ctx.clearRect(0,0,W,H);
+
+ roundedRectangle(1,1,W-2,H-2,23);
+ ctx.fillStyle=currentStyle==="gray"?"#68686b":"#ffffff";
+ ctx.fill();
+
+ const px=51;
+ const py=57;
+
+ drawPin(px,py,32);
+
+ if(currentStyle==="gray"){
+  ctx.fillStyle="#fff";
+ }else if(currentStyle==="purple"){
+  ctx.fillStyle="#70248c";
+ }else if(currentStyle==="rainbow"){
+  ctx.fillStyle="#ed1010";
+ }else{
+  ctx.fillStyle=instagramGradient(30,23,45,66);
+ }
+ ctx.fill();
+
+ ctx.beginPath();
+ ctx.arc(px,py-9,8.5,0,Math.PI*2);
+ ctx.fillStyle=currentStyle==="gray"?"#68686b":"#fff";
+ ctx.fill();
+
+ ctx.fillStyle=currentStyle==="gray"?"#fff":"#252525";
+ ctx.fillRect(86,21,3,68);
+
+ ctx.save();
+ ctx.translate(106,H/2);
+ ctx.scale(compression,1);
+ ctx.font=font;
+ ctx.textBaseline="middle";
+
+ if(currentStyle==="gray"){
+  ctx.fillStyle="#fff";
+ }else if(currentStyle==="purple"){
+  ctx.fillStyle="#30218e";
+ }else if(currentStyle==="rainbow"){
+  ctx.fillStyle=rainbowGradient(rawWidth);
+ }else{
+  ctx.fillStyle="#111";
+ }
+
+ ctx.fillText(text,0,2);
+ ctx.restore();
+
+ message("");
 }
 
 place.addEventListener("input",render);
+
 document.querySelectorAll(".style").forEach(button=>{
-button.addEventListener("click",()=>{
-document.querySelectorAll(".style").forEach(b=>b.classList.remove("active"));
-button.classList.add("active");
-style=button.dataset.style;
-render();
-});
+ button.addEventListener("click",()=>{
+  document.querySelectorAll(".style").forEach(b=>{
+   b.classList.remove("active");
+  });
+  button.classList.add("active");
+  currentStyle=button.dataset.style;
+  render();
+ });
 });
 
-document.getElementById("save").addEventListener("click",()=>{
-canvas.toBlob(blob=>{
-const url=URL.createObjectURL(blob);
-const a=document.createElement("a");
-a.href=url;
-a.download="location-sticker.png";
-a.click();
-setTimeout(()=>URL.revokeObjectURL(url),3000);
-},"image/png");
+function getPNG(){
+ return new Promise((resolve,reject)=>{
+  canvas.toBlob(blob=>{
+   if(blob)resolve(blob);
+   else reject(new Error("Falha ao gerar PNG"));
+  },"image/png");
+ });
+}
+
+document.getElementById("save").addEventListener("click",async()=>{
+ try{
+  const blob=await getPNG();
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="location-sticker.png";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+  message("Download solicitado. Confira o app Arquivos.");
+ }catch(e){
+  message("Não foi possível salvar. Use Abrir imagem.");
+ }
 });
 
 document.getElementById("copy").addEventListener("click",async()=>{
-try{
-const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
-await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
-alert("Sticker copiado!");
-}catch(e){
-alert("Não foi possível copiar. Use Salvar PNG.");
-}
+ try{
+  const blob=await getPNG();
+  if(!navigator.clipboard||!window.ClipboardItem){
+   throw new Error("Clipboard indisponível");
+  }
+  await navigator.clipboard.write([
+   new ClipboardItem({"image/png":blob})
+  ]);
+  message("PNG copiado!");
+ }catch(e){
+  message("Não foi possível copiar. Use Salvar PNG ou Abrir imagem.");
+ }
+});
+
+document.getElementById("view").addEventListener("click",()=>{
+ try{
+  const url=canvas.toDataURL("image/png");
+  const tab=window.open("","_blank");
+  if(tab){
+   tab.document.write(
+    '<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>'+
+    '<body style="margin:0;background:#777;display:flex;align-items:center;justify-content:center;min-height:100vh">'+
+    '<img alt="Sticker" style="max-width:95%;height:auto" src="'+url+'">'+
+    '</body></html>'
+   );
+   tab.document.close();
+   message("Na nova aba, toque e segure a imagem para salvá-la.");
+  }else{
+   window.location.href=url;
+  }
+ }catch(e){
+  message("Não foi possível abrir a imagem.");
+ }
 });
 
 render();
